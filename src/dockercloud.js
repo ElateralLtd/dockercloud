@@ -10,6 +10,11 @@ const STATES = {
   RUNNING: 'Running',
   STOPPED: 'Stopped',
   TERMINATED: 'Terminated',
+  DEPLOYING: 'Deploying',
+  DEPLOYED: 'Deployed',
+  UNREACHABLE: 'Unreachable',
+  UPGRADING: 'Upgrading',
+  TERMINATING: 'Terminating',
 }
 
 const EVENT_TYPES = {
@@ -17,6 +22,7 @@ const EVENT_TYPES = {
   SERVICE: 'service',
   CONTAINER: 'container',
   ACTION: 'action',
+  NODE: 'node',
 }
 
 class DockerCloud {
@@ -79,6 +85,12 @@ class DockerCloud {
     findById: this.findActionById.bind(this),
 
     waitUntilSuccess: this.waitUntilActionIsSuccess.bind(this),
+  }
+
+  nodes = {
+    query: this.queryNodes.bind(this),
+    findByTag: this.findNodesByTag.bind(this),
+    checkHealth: this.checkNodeHealth(this),
   }
 
   connect() {
@@ -383,6 +395,49 @@ class DockerCloud {
 
     return uuid
   }
+
+  // Nodes
+
+  queryNodes() {
+    return new Promise((resolve, reject) => {
+      this.appRequest.get('/node', (error, response, body) => {
+        if (error) return reject(error)
+
+        const nodes = JSON.parse(body).objects
+
+        return resolve(nodes)
+      })
+    })
+  }
+
+  findNodesByTag(tag) {
+    return new Promise((resolve, reject) => {
+      this.appRequest.get('/node', (error, response, body) => {
+        if (error) return reject(error)
+        if (response.statusCode >= 300) return reject(body)
+
+        const nodes = JSON.parse(body).objects
+        const matchingNodes = nodes.filter(x => x.indexOf(tag) > -1 && x.state !== STATES.TERMINATED)
+
+        return resolve(matchingNodes)
+      })
+    })
+  }
+
+  checkNodeHealth(id) {
+    return new Promise((resolve, reject) => {
+      this.appRequest.post(`/node/${id}/health-check/`, async (error, response, body) => {
+        if (error) return reject(error)
+        if (response.statusCode >= 300) return reject(body)
+
+        const actionId = this.extractUuid(response.headers['x-dockercloud-action-uri'])
+        const action = await this.findActionById(actionId)
+
+        return resolve(action)
+      })
+    })
+  }
+
 }
 
 export default DockerCloud
