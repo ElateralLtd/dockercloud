@@ -20,21 +20,23 @@ const EVENT_TYPES = {
 }
 
 class DockerCloud {
-  constructor(username, password) {
+  constructor(username, password, account) {
     this.credentials = {
       username,
       password,
     }
 
+    const optionalNamespace = account.length > 0 ? `/${account}` : ''
+
     this.appRequest = request.defaults({
-      baseUrl: 'https://cloud.docker.com/api/app/v1',
+      baseUrl: `https://cloud.docker.com/api/app/v1${optionalNamespace}`,
       headers: {
         'Content-Type': 'application/json',
       },
       auth: { username, password },
     })
     this.auditRequest = request.defaults({
-      baseUrl: 'https://cloud.docker.com/api/audit/v1',
+      baseUrl: `https://cloud.docker.com/api/audit/v1${optionalNamespace}`,
       headers: {
         'Content-Type': 'application/json',
       },
