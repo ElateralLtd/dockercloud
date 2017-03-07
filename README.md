@@ -287,3 +287,36 @@ Extract the UUID from an URL
 const uuuid = dockerCloud.extractUuid('/api/app/v1/action/7c42003e-eb39-4adc-b5b9-cbb7607fc698/')
 uuuid === '7c42003e-eb39-4adc-b5b9-cbb7607fc698'
 ```
+
+
+#### queryNodes
+
+The value returned by the promise will be a list of the nodes in your account.
+
+```js
+const nodes = await dockerCloud.queryNodes()
+```
+
+
+#### findNodesByTag
+
+The value returned by the promise will be the nodes with the tag passed.
+
+```js
+try {
+  const nodes = await dockerCloud.findNodesByTag('Tag')
+  // Do something with the nodes
+} catch (error) {
+  // If the error is empty there are no matching Nodes (404)
+}
+```
+
+
+#### checkNodeHealth
+
+Check the health of a node
+
+```js
+await dockerCloud.connect()
+const health = await dockerCloud.checkNodeHealth('nodeId')
+```
