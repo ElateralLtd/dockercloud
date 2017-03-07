@@ -14,13 +14,13 @@ npm install dockercloud
 
 ## Usage
 
-### Initilization
+### Initialization
 
 To use this class firstly you need to instantiate a new instance:
 ```js
 import DockerCloud from 'dockercloud'
 
-const dockerCloud = new DockerCloud('username', 'password')
+const dockerCloud = new DockerCloud('username', 'password', 'optional account/namespace')
 ```
 
 ### Methods
